@@ -1,5 +1,10 @@
 #pragma once
 #include <wrl.h>
+#include <DirectXTex.h>
+#include <dxgi1_3.h>
+#include <dxgi1_5.h>
+#include <d3d12.h>
+#include <vector>
 #include "../DirectX/d3dx12.h"
 #include "../Math/Vec.h"
 
@@ -9,7 +14,31 @@ namespace Engine {
 
 	protected:
 
-		Math::Vec2<int> WINDOW_RECT = Math::Vec2<int>(1280, 720);
+		//デバイス関連
+		Microsoft::WRL::ComPtr<IDXGIFactory3> m_factory;
+		Microsoft::WRL::ComPtr<IDXGIAdapter1> m_adapter;
+		Microsoft::WRL::ComPtr<ID3D12Device5> m_device;
+
+		//スワップチェーン
+		Microsoft::WRL::ComPtr<IDXGISwapChain4> m_swapchain;
+		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> m_renderTargets;
+		Microsoft::WRL::ComPtr<ID3D12Resource> m_depthStencil;
+		Microsoft::WRL::ComPtr<ID3D12Resource> m_depthBuffer;
+
+		//ディスクリプタヒープ
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
+		UINT m_rtvHeapSize;
+
+		//コマンド関連
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_commandQueue;
+		Microsoft::WRL::ComPtr<ID3D12CommandList> m_commandList;
+		std::vector<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>> m_commandAllocator;
+
+		//デバッグ関連
+		Microsoft::WRL::ComPtr<ID3D12Debug> m_debugLayer;
+		Microsoft::WRL::ComPtr<ID3D12Debug3> m_gpuBasedValidation;
+
 		const UINT FRAMEBUFFER_COUNT = 2;
 
 	public:
@@ -26,9 +55,6 @@ namespace Engine {
 		virtual void Prepare() {};
 		virtual void Cleanup() {};
 		virtual void MakeCommand(Microsoft::WRL::ComPtr<ID3D12CommandList>& arg_command) {};
-
-		//ウィンドウサイズを取得。
-		Math::Vec2<int> GetWindowRect() { return WINDOW_RECT; }
 
 	};
 

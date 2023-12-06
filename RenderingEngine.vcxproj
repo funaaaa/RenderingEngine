@@ -127,6 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\RenderingEngine\RenderingEngine.cpp" />
+    <ClCompile Include="Engine\Window\Window.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -135,6 +137,10 @@
   <ItemGroup>
     <ClInclude Include="Engine\DirectX\d3dx12.h" />
     <ClInclude Include="Engine\DirectX\stb_image.h" />
+    <ClInclude Include="Engine\Math\Transform.h" />
+    <ClInclude Include="Engine\Math\Vec.h" />
+    <ClInclude Include="Engine\RenderingEngine\RenderingEngine.h" />
+    <ClInclude Include="Engine\Window\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

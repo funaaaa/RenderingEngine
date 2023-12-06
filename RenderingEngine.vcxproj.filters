@@ -8,9 +8,24 @@
     <Filter Include="Engine\DirectX">
       <UniqueIdentifier>{ebbaa98d-b89b-4148-82f6-5775e24d6e06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\RenderingEngine">
+      <UniqueIdentifier>{85e67027-daa9-4ff2-99d2-e9c2bf49c890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Math">
+      <UniqueIdentifier>{76de2bc2-9f2c-4d26-9633-dac45f6a7dd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Window">
+      <UniqueIdentifier>{8a6e4f24-1e97-4e4d-9e5b-6e3b84e434e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Window\Window.cpp">
+      <Filter>Engine\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\RenderingEngine\RenderingEngine.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -23,6 +38,18 @@
     </ClInclude>
     <ClInclude Include="Engine\DirectX\stb_image.h">
       <Filter>Engine\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\RenderingEngine\RenderingEngine.h">
+      <Filter>Engine\RenderingEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Vec.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\Transform.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Window\Window.h">
+      <Filter>Engine\Window</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

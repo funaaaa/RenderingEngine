@@ -1,46 +1,35 @@
 ﻿#include "Engine/DirectX/d3dx12.h"
 #include "Engine/RenderingEngine/RenderingEngine.h"
+#include "Engine/Window/Window.h"
+#include <memory>
 
 HRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	// ⼀ 般 的 な W Mメッセージプロシージャの実装 (省略)
 	// :
+
+
+	HRESULT result = HRESULT();
+
+	return result;
+
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
 
 	//エンジン本体
-	Engine::RenderingEngine engine;
+	std::unique_ptr<Engine::RenderingEngine> engine;
 
-	//デバッグレイヤー有効化。
-	Microsoft::WRL::ComPtr<ID3D12Debug> debugLayer;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugLayer))))
-	{
-		debugLayer->EnableDebugLayer();
-	}
-	//GPUBased検証を有効化。
-	Microsoft::WRL::ComPtr<ID3D12Debug3> gpuBasedValidation;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&gpuBasedValidation))))
-	{
-		gpuBasedValidation->SetEnableGPUBasedValidation(true);
-	}
-
-	//ウィンドウを生成。
-	DWORD dwStyle = WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX;
-	RECT rect = { 0,0,engine.GetWindowRect().x, engine.GetWindowRect().y };
-	AdjustWindowRect(&rect, dwStyle, FALSE);
-	auto hwnd = CreateWindow(L"RenderingEngine", L"RenderingEngine", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT,
-		rect.right - rect.left, rect.bottom - rect.top,
-		nullptr, nullptr, hInstance, &engine);
+	//ウィンドウを作成。
+	Engine::Window window;
+	window.Create(hInstance, engine.get(), L"RenderingEngine");
 
 	//エンジンを初期化。
-	engine.Initialize(hwnd);
+	engine->Initialize(window.GetHWND());
 
 	//ウィンドウを表示。
-	SetWindowLongPtr(hwnd, GWLP_USERDATA,
-		reinterpret_cast<LONG_PTR>(&engine));
-	ShowWindow(hwnd, nCmdShow);
+	window.Show(engine.get(), nCmdShow);
 
 	//ゲームループ
 	MSG msg{};
