@@ -20,6 +20,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 
 	//エンジン本体
 	std::unique_ptr<Engine::RenderingEngine> engine;
+	engine = std::make_unique<Engine::RenderingEngine>();
 
 	//ウィンドウを作成。
 	Engine::Window window;
@@ -37,10 +38,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);			DispatchMessage(&msg);
 		}
-		engine.Render();
+		engine->Render();
 	}
 
 	//終了処理。
-	engine.Terminate();
-	return msg.wParam;
+	//engine.Terminate();
+	//return msg.wParam;
+	return 0;
 }

@@ -3,7 +3,6 @@
 #include <DirectXTex.h>
 #include <dxgi1_3.h>
 #include <dxgi1_5.h>
-#include <d3d12.h>
 #include <vector>
 #include "../DirectX/d3dx12.h"
 #include "../Math/Vec.h"
@@ -23,7 +22,6 @@ namespace Engine {
 		Microsoft::WRL::ComPtr<IDXGISwapChain4> m_swapchain;
 		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> m_renderTargets;
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_depthStencil;
-		Microsoft::WRL::ComPtr<ID3D12Resource> m_depthBuffer;
 
 		//ディスクリプタヒープ
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
@@ -32,8 +30,10 @@ namespace Engine {
 
 		//コマンド関連
 		Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_commandQueue;
-		Microsoft::WRL::ComPtr<ID3D12CommandList> m_commandList;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_commandList;
 		std::vector<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>> m_commandAllocator;
+		std::vector<Microsoft::WRL::ComPtr<ID3D12Fence1>> m_frameFence;
+		std::vector<UINT> m_frameFenceValue;
 
 		//デバッグ関連
 		Microsoft::WRL::ComPtr<ID3D12Debug> m_debugLayer;
@@ -44,12 +44,12 @@ namespace Engine {
 	public:
 
 		RenderingEngine();
-		virtual ~RenderingEngine();
+		virtual ~RenderingEngine() {};
 
 		void Initialize(HWND arg_hwnd);
-		void Terminate();
+		void Terminate() {};
 
-		virtual void Render();
+		void Render();
 
 		//以下派生先で章ごとに内容をオーバーラードするらしい。
 		virtual void Prepare() {};
