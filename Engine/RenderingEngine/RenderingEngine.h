@@ -52,14 +52,14 @@ namespace Engine {
 		//頂点構造体
 		struct Vertex {
 			Math::Vec3<float> m_pos;
-			Math::Vec3<float> m_color;
-			Vertex(Math::Vec3<float> arg_pos, Math::Vec3<float> arg_color) : m_pos(arg_pos), m_color(arg_color) {}
+			Math::Vec4<float> m_color;
+			Vertex(Math::Vec3<float> arg_pos, Math::Vec4<float> arg_color) : m_pos(arg_pos), m_color(arg_color) {}
 		};
 
 		//頂点・インデックス配列
 		std::vector<Vertex> m_vertex;
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_vertexBuffer;
-		std::vector<UINT> m_index;
+		std::vector<uint32_t> m_index;
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_indexBuffer;
 
 		//頂点・インデックスビュー
@@ -70,6 +70,13 @@ namespace Engine {
 		Microsoft::WRL::ComPtr<ID3DBlob> m_vs;
 		Microsoft::WRL::ComPtr<ID3DBlob> m_ps;
 		Microsoft::WRL::ComPtr<ID3DBlob> m_errorBlob;
+
+		//ルートシグネチャ
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rootSignature;
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipeline;
+
+		CD3DX12_VIEWPORT  m_viewport;
+		CD3DX12_RECT m_scissorRect;
 
 
 	public:

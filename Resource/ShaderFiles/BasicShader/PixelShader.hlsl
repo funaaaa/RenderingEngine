@@ -4,7 +4,7 @@ struct VSOutput
     float4 m_color : COLOR;
 };
 
-float4 main(VSOutput arg_in) : SV_TARGET
+float4 main(VSOutput arg_in) : SV_Target
 {
     return arg_in.m_color;
 }

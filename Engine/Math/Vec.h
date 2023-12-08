@@ -376,4 +376,156 @@ namespace Math {
 	};
 #pragma endregion
 
+#pragma region Vec4
+	template<typename T>
+	struct Vec4
+	{
+		T x, y, z, a;
+
+		Vec4()
+		{
+			x = 0;
+			y = 0;
+			z = 0;
+			a = 0;
+		};
+		Vec4(T X, T Y, T Z, T A) :x(X), y(Y), z(Z), a(A) {};
+
+		DirectX::XMFLOAT3 ConvertXMFLOAT3()const
+		{
+			return DirectX::XMFLOAT3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+		};
+		DirectX::XMFLOAT4 ConvertXMFLOAT4()const
+		{
+			return DirectX::XMFLOAT4(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(a));
+		};
+		DirectX::XMVECTOR ConvertXMVECTOR()
+		{
+			DirectX::XMVECTOR result = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(a) };
+			return result;
+		};
+
+		Vec4<int>Int()const
+		{
+			return Vec4<int>(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z), static_cast<int>(a));
+		}
+		Vec4<float>Float()const
+		{
+			return Vec4<float>(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(a));
+		}
+
+		void Abs()
+		{
+			x = fabs(x);
+			y = fabs(y);
+			z = fabs(z);
+			a = fabs(a);
+		}
+
+#pragma region オペレーター演算子
+		Vec4 operator-()const
+		{
+			return Vec4(-x, -y, -z);
+		}
+		Vec4 operator+(const Vec4& rhs)const
+		{
+			return Vec4(x + rhs.x, y + rhs.y, z + rhs.z, a + rhs.a);
+		};
+		Vec4 operator-(const Vec4& rhs)const
+		{
+			return Vec4(x - rhs.x, y - rhs.y, z - rhs.z, a - rhs.a);
+		};
+		Vec4 operator*(const Vec4& rhs) const
+		{
+			return Vec4(x * rhs.x, y * rhs.y, z * rhs.z, a * rhs.a);
+		};
+		Vec4 operator*(const float& rhs)const
+		{
+			return Vec4(x * rhs, y * rhs, z * rhs, a * rhs);
+		};
+		Vec4 operator/(const Vec4& rhs)const
+		{
+			return Vec4(x / rhs.x, y / rhs.y, z / rhs.z);
+		};
+		Vec4 operator/(const float& rhs)const
+		{
+			return Vec4(x / rhs, y / rhs, z / rhs, a / rhs);
+		};
+		Vec4 operator%(const Vec4& rhs)const
+		{
+			return Vec4(fmodf(x, rhs.x), fmodf(y, rhs.y), fmodf(z, rhs.z));
+		};
+		void operator=(const Vec4& rhs)
+		{
+			x = rhs.x;
+			y = rhs.y;
+			z = rhs.z;
+			a = rhs.a;
+		};
+		bool operator==(const Vec4& rhs)const
+		{
+			return (x == rhs.x && y == rhs.y && z == rhs.z && a == rhs.a);
+		};
+		bool operator!=(const Vec4& rhs)const
+		{
+			return !(x == rhs.x && y == rhs.y && z == rhs.z && a == rhs.a);
+		};
+		void operator+=(const Vec4& rhs)
+		{
+			x += rhs.x;
+			y += rhs.y;
+			z += rhs.z;
+		};
+		void operator+=(const float& rhs)
+		{
+			x += rhs;
+			y += rhs;
+			z += rhs;
+		};
+		void operator-=(const Vec4& rhs)
+		{
+			x -= rhs.x;
+			y -= rhs.y;
+			z -= rhs.z;
+		};
+		void operator-=(const float& rhs)
+		{
+			x -= rhs;
+			y -= rhs;
+			z -= rhs;
+		};
+		void operator*=(const Vec4& rhs)
+		{
+			x *= rhs.x;
+			y *= rhs.y;
+			z *= rhs.z;
+		};
+		void operator*=(const float& rhs)
+		{
+			x *= rhs;
+			y *= rhs;
+			z *= rhs;
+		};
+		void operator/=(const Vec4& rhs)
+		{
+			x /= rhs.x;
+			y /= rhs.y;
+			z /= rhs.z;
+		};
+		void operator/=(const float& rhs)
+		{
+			x /= rhs;
+			y /= rhs;
+			z /= rhs;
+		};
+		void operator%=(const Vec4& rhs)
+		{
+			x = fmodf(x, rhs.x);
+			y = fmodf(y, rhs.y);
+			z = fmodf(z, rhs.z);
+		};
+#pragma endregion
+	};
+#pragma endregion
+
 }

@@ -190,58 +190,103 @@ void Engine::RenderingEngine::Initialize(HWND arg_hwnd)
 
 	//シェーダー読み込み
 	CompileShaderFromFile(L"Resource/ShaderFiles/BasicShader/VertexShader.hlsl", L"vs_6_0", m_vs, m_errorBlob);
-	CompileShaderFromFile(L"Resource/ShaderFiles/BasicShader/PixelShader.hlsl", L"vs_6_0", m_ps, m_errorBlob);
+	CompileShaderFromFile(L"Resource/ShaderFiles/BasicShader/PixelShader.hlsl", L"ps_6_0", m_ps, m_errorBlob);
 
-	////頂点データとインデックスデータを設定。
-	//m_vertex.emplace_back(Vertex({ 0.0f, 0.25f, 0.0f }, {1.0f, 0.0f, 0.0f}));
-	//m_vertex.emplace_back(Vertex({ 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f }));
-	//m_vertex.emplace_back(Vertex({ -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f }));
-	//m_index.emplace_back(0);
-	//m_index.emplace_back(1);
-	//m_index.emplace_back(2);
+	//頂点データとインデックスデータを設定。
+	m_vertex.emplace_back(Vertex({ 0.0f, 0.25f, 0.0f }, { 0.80f, 0.71f, 0.64f, 1.0f }));
+	m_vertex.emplace_back(Vertex({ 0.25f, -0.25f, 0.0f }, { 0.60f, 0.45f, 0.50f, 1.0f }));
+	m_vertex.emplace_back(Vertex({ -0.25f, -0.25f, 0.0f }, { 0.90f, 0.85f, 0.80f, 1.0f }));
+	m_index.emplace_back(0);
+	m_index.emplace_back(1);
+	m_index.emplace_back(2);
 
-	////データ転送
-	//UINT vertexBufferSize = sizeof(m_vertex);
-	//UINT indexBufferSize = sizeof(m_index);
-	//void* pVertexData;
-	//CD3DX12_RANGE vbRange(0, 0);
-	//m_vertexBuffer->Map(0, &vbRange, &pVertexData);
-	//memcpy(pVertexData, m_vertex.data(), vertexBufferSize);
-	//m_vertexBuffer->Unmap(0, nullptr);
-	//void* pIndexData;
-	//CD3DX12_RANGE ibRange(0, 0);
-	//m_indexBuffer->Map(0, &ibRange, &pIndexData);
-	//memcpy(pIndexData, m_index.data(), indexBufferSize);
-	//m_indexBuffer->Unmap(0, nullptr);
+	//頂点バッファを生成。
+	UINT vertexBufferSize = static_cast<UINT>(m_vertex.size());
+	UINT indexBufferSize = static_cast<UINT>(m_index.size());
+	m_device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize * sizeof(Vertex)),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&m_vertexBuffer));
+	//インデックスバッファを生成。
+	m_device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize * sizeof(uint32_t)),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&m_indexBuffer));
 
-	////頂点バッファを生成。
-	//m_device->CreateCommittedResource(
-	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-	//	D3D12_HEAP_FLAG_NONE,
-	//	&CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize),
-	//	D3D12_RESOURCE_STATE_GENERIC_READ,
-	//	nullptr,
-	//	IID_PPV_ARGS(&m_vertexBuffer));
-	////インデックスバッファを生成。
-	//UINT bufferSize = sizeof(m_vertex);
-	//m_device->CreateCommittedResource(
-	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-	//	D3D12_HEAP_FLAG_NONE,
-	//	&CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize),
-	//	D3D12_RESOURCE_STATE_GENERIC_READ,
-	//	nullptr,
-	//	IID_PPV_ARGS(&m_vertexBuffer));
-	////頂点バッファビューを生成。
-	//m_vertexBufferView.BufferLocation =
-	//	m_vertexBuffer->GetGPUVirtualAddress();
-	//m_vertexBufferView.SizeInBytes = bufferSize;
-	//m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-	////インデックスバッファビューを生成。
-	//m_indexBufferView.BufferLocation =
-	//	m_indexBuffer->GetGPUVirtualAddress();
-	//m_indexBufferView.SizeInBytes = indexBufferSize;
-	//m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 
+	//データ転送
+	void* pVertexData;
+	CD3DX12_RANGE vbRange(0, 0);
+	m_vertexBuffer->Map(0, &vbRange, &pVertexData);
+	memcpy(pVertexData, m_vertex.data(), vertexBufferSize * sizeof(Vertex));
+	m_vertexBuffer->Unmap(0, nullptr);
+	void* pIndexData;
+	CD3DX12_RANGE ibRange(0, 0);
+	m_indexBuffer->Map(0, &ibRange, &pIndexData);
+	memcpy(pIndexData, m_index.data(), indexBufferSize * sizeof(uint32_t));
+	m_indexBuffer->Unmap(0, nullptr);
+
+	//頂点バッファビューを生成。
+	m_vertexBufferView.BufferLocation =
+		m_vertexBuffer->GetGPUVirtualAddress();
+	m_vertexBufferView.SizeInBytes = vertexBufferSize * sizeof(Vertex);
+	m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+	//インデックスバッファビューを生成。
+	m_indexBufferView.BufferLocation =
+		m_indexBuffer->GetGPUVirtualAddress();
+	m_indexBufferView.SizeInBytes = indexBufferSize * sizeof(uint32_t);
+	m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+	//ルートシグネチャの構築
+	Microsoft::WRL::ComPtr<ID3DBlob> signature;
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc{};
+	rootSigDesc.Init(
+		0, nullptr,   //pParameters
+		0, nullptr,   //pStaticSamplers
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+	);
+	D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signature, &m_errorBlob);
+	//RootSignature の生成
+	m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature));
+
+	//インプットレイアウト
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[] = {
+	  { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, m_pos), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA},
+	  { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, offsetof(Vertex, m_color), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA},
+	};
+
+	//パイプラインステートオブジェクトの生成.
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
+	//シェーダーのセット
+	psoDesc.VS = CD3DX12_SHADER_BYTECODE(m_vs.Get());
+	psoDesc.PS = CD3DX12_SHADER_BYTECODE(m_ps.Get());
+	//ブレンドステート設定
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	//ラスタライザーステート
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	//出力先は1ターゲット
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	//デプスバッファのフォーマットを設定
+	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+	psoDesc.InputLayout = { inputElementDesc, _countof(inputElementDesc) };
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	//ルートシグネチャのセット
+	psoDesc.pRootSignature = m_rootSignature.Get();
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	//マルチサンプル設定
+	psoDesc.SampleDesc = { 1,0 };
+	psoDesc.SampleMask = UINT_MAX; // これを忘れると絵が出ない＆警告も出ないので注意.
+	m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipeline));
+
+	m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, float(width), float(height));
+	m_scissorRect = CD3DX12_RECT(0, 0, LONG(width), LONG(height));
 
 }
 
@@ -272,6 +317,30 @@ void Engine::RenderingEngine::Render()
 
 	//描画先をセット
 	m_commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+
+
+
+
+
+
+	//パイプラインステートのセット
+	m_commandList->SetPipelineState(m_pipeline.Get());
+	//ルートシグネチャのセット
+	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+	//ビューポートとシザーのセット
+	m_commandList->RSSetViewports(1, &m_viewport);
+	m_commandList->RSSetScissorRects(1, &m_scissorRect);
+
+	//プリミティブタイプ、頂点・インデックスバッファのセット
+	m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	m_commandList->IASetIndexBuffer(&m_indexBufferView);
+
+	//描画命令の発行
+	m_commandList->DrawIndexedInstanced(static_cast<UINT>(m_index.size()), 1, 0, 0, 0);
+
+
+
 
 	//レンダーターゲット描画可能状態からスワップチェーン表示可能状態へ
 	auto barrierToPresent = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -308,11 +377,11 @@ void Engine::RenderingEngine::Render()
 	}
 
 
-}
+	}
 
 HRESULT Engine::RenderingEngine::CompileShaderFromFile(const std::wstring& arg_fileName, const std::wstring& arg_profile, Microsoft::WRL::ComPtr<ID3DBlob>& arg_shaderBlob, Microsoft::WRL::ComPtr<ID3DBlob>& arg_errorMsg)
 {
-	
+
 	std::filesystem::path filePath(arg_fileName);
 	std::ifstream infile(filePath);
 	std::vector<char> srcData;
@@ -321,7 +390,7 @@ HRESULT Engine::RenderingEngine::CompileShaderFromFile(const std::wstring& arg_f
 	srcData.resize(uint32_t(infile.seekg(0, infile.end).tellg()));
 	infile.seekg(0, infile.beg).read(srcData.data(), srcData.size());
 
-	// DXC によるコンパイル処理
+	//DXCによるコンパイル処理
 	Microsoft::WRL::ComPtr<IDxcLibrary> library;
 	Microsoft::WRL::ComPtr<IDxcCompiler> compiler;
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> source;
@@ -335,13 +404,13 @@ HRESULT Engine::RenderingEngine::CompileShaderFromFile(const std::wstring& arg_f
   #if _DEBUG
 	  L"/Zi", L"/O0",
   #else
-	  L"/O2" // リリースビルドでは最適化
+	  L"/O2" //リリースビルドでは最適化
   #endif
 	};
 	compiler->Compile(source.Get(), filePath.wstring().c_str(),
 		L"main", arg_profile.c_str(),
 		compilerFlags, _countof(compilerFlags),
-		nullptr, 0, // Defines
+		nullptr, 0, //Defines
 		nullptr,
 		&dxcResult);
 
@@ -358,6 +427,17 @@ HRESULT Engine::RenderingEngine::CompileShaderFromFile(const std::wstring& arg_f
 		dxcResult->GetErrorBuffer(
 			reinterpret_cast<IDxcBlobEncoding**>(arg_errorMsg.GetAddressOf())
 		);
+
+		//GetBufferPointerとGetBufferSizeを使って内容にアクセス
+		const char* pData = static_cast<const char*>(arg_errorMsg->GetBufferPointer());
+		size_t size = arg_errorMsg->GetBufferSize();
+
+		//バッファを文字列として読む
+		std::string content(pData, pData + size);
+
+		//VisualStudioの出力ウィンドウに出力
+		OutputDebugStringA(content.c_str());
+
 	}
 	return hr;
 }
