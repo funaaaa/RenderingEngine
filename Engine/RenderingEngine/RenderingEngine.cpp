@@ -1,7 +1,11 @@
 ﻿#include "RenderingEngine.h"
+#include <fstream>
+#include <filesystem>
+#include <dxcapi.h>
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
+#pragma comment(lib,"dxcompiler.lib")
 
 Engine::RenderingEngine::RenderingEngine()
 {
@@ -179,6 +183,66 @@ void Engine::RenderingEngine::Initialize(HWND arg_hwnd)
 
 
 
+
+
+
+	/*-- 後でまとめるやつら --*/
+
+	//シェーダー読み込み
+	CompileShaderFromFile(L"Resource/ShaderFiles/BasicShader/VertexShader.hlsl", L"vs_6_0", m_vs, m_errorBlob);
+	CompileShaderFromFile(L"Resource/ShaderFiles/BasicShader/PixelShader.hlsl", L"vs_6_0", m_ps, m_errorBlob);
+
+	////頂点データとインデックスデータを設定。
+	//m_vertex.emplace_back(Vertex({ 0.0f, 0.25f, 0.0f }, {1.0f, 0.0f, 0.0f}));
+	//m_vertex.emplace_back(Vertex({ 0.25f, -0.25f, 0.0f }, { 0.0f, 1.0f, 0.0f }));
+	//m_vertex.emplace_back(Vertex({ -0.25f, -0.25f, 0.0f }, { 0.0f, 0.0f, 1.0f }));
+	//m_index.emplace_back(0);
+	//m_index.emplace_back(1);
+	//m_index.emplace_back(2);
+
+	////データ転送
+	//UINT vertexBufferSize = sizeof(m_vertex);
+	//UINT indexBufferSize = sizeof(m_index);
+	//void* pVertexData;
+	//CD3DX12_RANGE vbRange(0, 0);
+	//m_vertexBuffer->Map(0, &vbRange, &pVertexData);
+	//memcpy(pVertexData, m_vertex.data(), vertexBufferSize);
+	//m_vertexBuffer->Unmap(0, nullptr);
+	//void* pIndexData;
+	//CD3DX12_RANGE ibRange(0, 0);
+	//m_indexBuffer->Map(0, &ibRange, &pIndexData);
+	//memcpy(pIndexData, m_index.data(), indexBufferSize);
+	//m_indexBuffer->Unmap(0, nullptr);
+
+	////頂点バッファを生成。
+	//m_device->CreateCommittedResource(
+	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+	//	D3D12_HEAP_FLAG_NONE,
+	//	&CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize),
+	//	D3D12_RESOURCE_STATE_GENERIC_READ,
+	//	nullptr,
+	//	IID_PPV_ARGS(&m_vertexBuffer));
+	////インデックスバッファを生成。
+	//UINT bufferSize = sizeof(m_vertex);
+	//m_device->CreateCommittedResource(
+	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+	//	D3D12_HEAP_FLAG_NONE,
+	//	&CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize),
+	//	D3D12_RESOURCE_STATE_GENERIC_READ,
+	//	nullptr,
+	//	IID_PPV_ARGS(&m_vertexBuffer));
+	////頂点バッファビューを生成。
+	//m_vertexBufferView.BufferLocation =
+	//	m_vertexBuffer->GetGPUVirtualAddress();
+	//m_vertexBufferView.SizeInBytes = bufferSize;
+	//m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+	////インデックスバッファビューを生成。
+	//m_indexBufferView.BufferLocation =
+	//	m_indexBuffer->GetGPUVirtualAddress();
+	//m_indexBufferView.SizeInBytes = indexBufferSize;
+	//m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+
 }
 
 void Engine::RenderingEngine::Render()
@@ -244,4 +308,56 @@ void Engine::RenderingEngine::Render()
 	}
 
 
+}
+
+HRESULT Engine::RenderingEngine::CompileShaderFromFile(const std::wstring& arg_fileName, const std::wstring& arg_profile, Microsoft::WRL::ComPtr<ID3DBlob>& arg_shaderBlob, Microsoft::WRL::ComPtr<ID3DBlob>& arg_errorMsg)
+{
+	
+	std::filesystem::path filePath(arg_fileName);
+	std::ifstream infile(filePath);
+	std::vector<char> srcData;
+	if (!infile)
+		throw std::runtime_error("shader not found");
+	srcData.resize(uint32_t(infile.seekg(0, infile.end).tellg()));
+	infile.seekg(0, infile.beg).read(srcData.data(), srcData.size());
+
+	// DXC によるコンパイル処理
+	Microsoft::WRL::ComPtr<IDxcLibrary> library;
+	Microsoft::WRL::ComPtr<IDxcCompiler> compiler;
+	Microsoft::WRL::ComPtr<IDxcBlobEncoding> source;
+	Microsoft::WRL::ComPtr<IDxcOperationResult> dxcResult;
+
+	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
+	library->CreateBlobWithEncodingFromPinned(srcData.data(), UINT(srcData.size()), CP_ACP, &source);
+	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
+
+	LPCWSTR compilerFlags[] = {
+  #if _DEBUG
+	  L"/Zi", L"/O0",
+  #else
+	  L"/O2" // リリースビルドでは最適化
+  #endif
+	};
+	compiler->Compile(source.Get(), filePath.wstring().c_str(),
+		L"main", arg_profile.c_str(),
+		compilerFlags, _countof(compilerFlags),
+		nullptr, 0, // Defines
+		nullptr,
+		&dxcResult);
+
+	HRESULT hr;
+	dxcResult->GetStatus(&hr);
+	if (SUCCEEDED(hr))
+	{
+		dxcResult->GetResult(
+			reinterpret_cast<IDxcBlob**>(arg_shaderBlob.GetAddressOf())
+		);
+	}
+	else
+	{
+		dxcResult->GetErrorBuffer(
+			reinterpret_cast<IDxcBlobEncoding**>(arg_errorMsg.GetAddressOf())
+		);
+	}
+	return hr;
 }
